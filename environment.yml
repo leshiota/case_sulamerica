@@ -1,0 +1,14 @@
+name: sulamerica
+channels:
+  - defaults
+dependencies:
+  - jupyter
+  - numpy
+  - pandas
+  - statsmodels
+  - scikit-learn
+  - matplotlib
+  - seaborn 
+  - xlrd
+  - flake8
+
