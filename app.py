@@ -2,24 +2,15 @@
 from src.utils import sulamerica as sl
 
 df = sl.read_data('data/cases_internacao_SUS.xls')
+df = sl.rename_data(df)
+df = df[df['AIH_aprovadas']>0]
 
-months = {'jul19': 201907,
-          'jun19': 201906,
-          'dez17': 201712,
-          'mar18': 201803,
-          'abr19': 201904,
-          'abr18': 201804,
-          'mai18': 201805,
-          'jul18': 201807,
-          'ago18': 201808,
-          'set18': 201809,
-          'nov18': 201811,
-          'dez18': 201812,
-          'jan19': 201901,
-          'fev19': 201902}
+df['Val_serv_hosp_-_compl_federal'] = pd.to_numeric(df['Val_serv_hosp_-_compl_federal'], errors='coerce')
+df['Val_serv_hosp_-_compl_gestor'] = pd.to_numeric(df['Val_serv_hosp_-_compl_gestor'], errors='coerce')
 
+df['Val_serv_prof_-_compl_federal'] = pd.to_numeric(df['Val_serv_prof_-_compl_federal'], errors='coerce')
+df['Val_serv_prof_-_compl_gestor'] = pd.to_numeric(df['Val_serv_prof_-_compl_gestor'], errors='coerce')
 
-df['period'] = df['sheet_name'].map(months)
+df['hospitalar_total'] = (df['Valor_serviços_hospitalares'] + df['Val_serv_hosp_-_compl_federal'] + df['Valor_serviços_hospitalares'])
+df['servicos_total'] = (df['Val_serv_prof_-_compl_federal'] + df['Val_serv_prof_-_compl_gestor'] + df['Valor_serviços_profissionais'])
 
-
-# %%
