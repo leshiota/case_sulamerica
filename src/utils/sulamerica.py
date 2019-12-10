@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from itertools import combinations
 
 
 def read_data(filename):
@@ -104,5 +105,34 @@ def rename_data(df):
     df['period'] = df['sheet_name'].map(months)
     df['Regiao'] = df['Região/Unidade da Federação'].map(regiao)
     df['Região/Unidade da Federação'] = df['Região/Unidade da Federação'].map(nomes)
+
+    return df
+
+
+def add_period_data(df):
+    period_list = ['2017-12',
+                   '2018-01',
+                   '2018-02',
+                   '2018-03',
+                   '2018-04',
+                   '2018-05',
+                   '2018-06',
+                   '2018-07',
+                   '2018-08',
+                   '2018-09',
+                   '2018-10',
+                   '2018-11',
+                   '2018-12',
+                   '2019-01',
+                   '2019-02',
+                   '2019-03',
+                   '2019-04',
+                   '2019-05',
+                   '2019-06',
+                   '2019-07']
+
+    temp_df = pd.DataFrame(period_list, columns=['period'])
+
+    df = pd.merge(temp_df, df, how="left", on="period")
 
     return df
