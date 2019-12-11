@@ -110,29 +110,26 @@ def rename_data(df):
 
 
 def add_period_data(df):
-    period_list = ['2017-12',
-                   '2018-01',
-                   '2018-02',
-                   '2018-03',
-                   '2018-04',
-                   '2018-05',
-                   '2018-06',
-                   '2018-07',
-                   '2018-08',
-                   '2018-09',
-                   '2018-10',
-                   '2018-11',
-                   '2018-12',
-                   '2019-01',
-                   '2019-02',
-                   '2019-03',
-                   '2019-04',
-                   '2019-05',
-                   '2019-06',
-                   '2019-07']
+    period_list = ['2017-12', '2018-01', '2018-02', '2018-03', '2018-04', '2018-05',
+                   '2018-06', '2018-07', '2018-08', '2018-09', '2018-10', '2018-11',
+                   '2018-12', '2019-01', '2019-02', '2019-03', '2019-04', '2019-05',
+                   '2019-06', '2019-07'] 
 
-    temp_df = pd.DataFrame(period_list, columns=['period'])
+    names_list = ['Região Norte', 'Rondônia', 'Acre', 'Amazonas', 'Roraima', 'Pará',
+                  'Amapá', 'Tocantins', 'Região Nordeste', 'Maranhão', 'Piauí',
+                  'Ceará', 'Rio Grande do Norte', 'Paraíba', 'Pernambuco', 'Alagoas',
+                  'Sergipe', 'Bahia', 'Região Sudeste', 'Minas Gerais',
+                  'Espírito Santo', 'Rio de Janeiro', 'São Paulo', 'Região Sul',
+                  'Paraná', 'Santa Catarina', 'Rio Grande do Sul',
+                  'Região Centro-Oeste', 'Mato Grosso do Sul', 'Mato Grosso',
+                  'Goiás', 'Distrito Federal', 'Total']
+    comb = []
+    for period in period_list:
+        for name in names_list:
+            comb.append([period, name])
 
-    df = pd.merge(temp_df, df, how="left", on="period")
+    temp_df = pd.DataFrame(comb, columns=['period','Região/Unidade da Federação'])
+
+    df = pd.merge(temp_df, df, how="left")
 
     return df
