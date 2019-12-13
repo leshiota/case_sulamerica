@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import pandas as pd
 import numpy as np
 
@@ -58,15 +60,17 @@ regiao_list = ['Rondônia', 'Acre', 'Amazonas', 'Roraima', 'Pará',
                'Mato Grosso do Sul', 'Mato Grosso',
                'Goiás', 'Distrito Federal']
 
-reg_dict = {'Rondônia': 'NORTE', 'Acre':'NORTE', 'Amazonas':'NORTE',
-            'Roraima':'NORTE', 'Pará':'NORTE', 'Amapá':'NORTE',
-            'Tocantins':'NORTE', 'Maranhão':'NORDESTE', 'Piauí':'NORDESTE',
-            'Ceará':'NORDESTE', 'Rio Grande do Norte':'NORDESTE', 'Paraíba':'NORDESTE',
-            'Pernambuco':'NORDESTE', 'Alagoas':'NORDESTE', 'Sergipe':'NORDESTE',
-            'Bahia':'NORDESTE', 'Minas Gerais':'SUDESTE', 'Espírito Santo':'SUDESTE',
-            'Rio de Janeiro':'SUDESTE', 'São Paulo':'SUDESTE', 'Paraná':'SUL',
-            'Santa Catarina':'SUL', 'Rio Grande do Sul':'SUL', 'Mato Grosso do Sul': 'CENTRO-OEST,E'
-            'Mato Grosso': 'CENTRO-OESTE', 'Goiás': 'CENTRO-OESTE', 'Distrito Federal': 'CENTRO-OESTE'}
+reg_dict = {'Rondônia': 'NORTE', 'Acre': 'NORTE', 'Amazonas': 'NORTE',
+            'Roraima': 'NORTE', 'Pará': 'NORTE', 'Amapá': 'NORTE',
+            'Tocantins': 'NORTE', 'Maranhão': 'NORDESTE', 'Piauí': 'NORDESTE',
+            'Ceará': 'NORDESTE', 'Rio Grande do Norte': 'NORDESTE', 'Paraíba': 'NORDESTE',
+            'Pernambuco': 'NORDESTE', 'Alagoas': 'NORDESTE', 'Sergipe': 'NORDESTE',
+            'Bahia': 'NORDESTE', 'Minas Gerais': 'SUDESTE', 'Espírito Santo': 'SUDESTE',
+            'Rio de Janeiro': 'SUDESTE', 'São Paulo': 'SUDESTE', 'Paraná': 'SUL',
+            'Santa Catarina': 'SUL', 'Rio Grande do Sul': 'SUL',
+            'Mato Grosso do Sul': 'CENTRO-OESTE',
+            'Mato Grosso': 'CENTRO-OESTE', 'Goiás': 'CENTRO-OESTE',
+            'Distrito Federal': 'CENTRO-OESTE'}
 
 
 """
@@ -113,15 +117,17 @@ class Sulamerica:
 
         return df
 
+    
     def _break_data(self, df):
 
         df = df.sort_values(by=['period'])    
         df_list = list()
-        for regiao in regiao_list:
-            df_list.append(df[df['Região/Unidade da Federação'] == regiao])
+        for region in regiao_list:
+            df_list.append(df[df['Região/Unidade da Federação'] == region])
 
         return df_list
 
+    
     def _impute_data(self, df,
                      method='linear',
                      feature_list=['Internações', 'AIH_aprovadas',
@@ -136,7 +142,7 @@ class Sulamerica:
     
     def reconstruct_data(self, df, method='linear'):
     
-        df_list = super()._break_data(df=df)
+        df_list = self._break_data(df=df)
     
         recon_df = pd.DataFrame(columns=['Região/Unidade da Federação','period', 
                                           'Internações', 'AIH_aprovadas',
@@ -144,17 +150,19 @@ class Sulamerica:
                                           'Dias_permanência', 'Óbitos',
                                           'hospitalar_total', 'servicos_total'])
         for dfs in df_list:
-            imputed_df = super()._impute_data(df=dfs, method=method)
+            imputed_df = self._impute_data(df=dfs, method=method)
             recon_df = pd.concat([recon_df, imputed_df],
                                  axis=0,
                                  ignore_index=True)
     
-        recon_df = recon_df[recon_df[['Região/Unidade da Federação','period', 
-                                          'Internações', 'AIH_aprovadas',
-                                          'Valor_total', 'Valor_médio_AIH',
-                                          'Dias_permanência', 'Óbitos',
-                                          'hospitalar_total', 'servicos_total']]]
-        recon_df['Região/Unidade da Federação'] = df['Região/Unidade da Federação']\
+        recon_df = recon_df[['Região/Unidade da Federação','period', 
+                             'Internações', 'AIH_aprovadas',
+                             'Valor_total', 'Valor_médio_AIH',
+                             'Dias_permanência', 'Óbitos',
+                             'hospitalar_total', 'servicos_total']].\
+            sort_values(by=['Região/Unidade da Federação', 'period'])
+        
+        recon_df['Regiao'] = recon_df['Região/Unidade da Federação']\
             .map(reg_dict)
 
         return recon_df

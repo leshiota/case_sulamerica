@@ -12,3 +12,6 @@ dependencies:
   - xlrd
   - flake8
   - autopep8
+  - pip:
+    - .
+
