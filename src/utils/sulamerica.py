@@ -2,6 +2,13 @@
 
 import pandas as pd
 import numpy as np
+import math
+import matplotlib.pyplot as plt
+import statsmodels.formula.api as smf            # statistics and econometrics
+import statsmodels.tsa.api as smt
+import statsmodels.api as sm
+import scipy.stats as scsfit
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 """
 Hard coded dictionaries and lists
@@ -162,7 +169,82 @@ class Sulamerica:
                              'hospitalar_total', 'servicos_total']].\
             sort_values(by=['Região/Unidade da Federação', 'period'])
         
-        recon_df['Regiao'] = recon_df['Região/Unidade da Federação']\
-            .map(reg_dict)
+        recon_df['Regiao'] = recon_df['Região/Unidade da Federação'].\
+            map(reg_dict)
 
         return recon_df
+
+    def ts_train_test_split(self, data, n_test):
+
+        return data[:(data.shape[0]-n_test)], data[(data.shape[0]-n_test):]
+
+    def tsplot(self, y, lags=None, figsize=(12, 7), style='bmh'):
+        """
+            Plot time series, its ACF and PACF, calculate Dickey–Fuller test
+
+            y - timeseries
+            lags - how many lags to include in ACF, PACF calculation
+        """
+        if not isinstance(y, pd.Series):
+            y = pd.Series(y)
+
+        with plt.style.context(style):    
+            fig = plt.figure(figsize=figsize)
+            layout = (2, 2)
+            ts_ax = plt.subplot2grid(layout, (0, 0), colspan=2)
+            acf_ax = plt.subplot2grid(layout, (1, 0))
+            pacf_ax = plt.subplot2grid(layout, (1, 1))
+
+            y.plot(ax=ts_ax)
+            p_value = sm.tsa.stattools.adfuller(y)[1]
+            ts_ax.set_title('Time Series Analysis Plots\n Dickey-Fuller: p={0:.5f}'.format(p_value))
+            smt.graphics.plot_acf(y, lags=lags, ax=acf_ax)
+            smt.graphics.plot_pacf(y, lags=lags, ax=pacf_ax)
+            plt.tight_layout()
+
+    def mape_error(self, y_true, y_pred): 
+        return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+    
+    def grid_seacrh_ets(self, y_train, y_test):
+        trend = [None, "add", "mul"]
+        seasonal = [None, "add", "mul"]
+        seasonal_periods = [None, 3, 6, 9, 12]
+        bc_transform = [True, False]
+        remove_bias = [True, False]
+
+        best_mape = None
+        best_model = None
+        errors = []
+
+        for t in trend:
+            for s in seasonal:
+                for sp in seasonal_periods:
+                    for bc in bc_transform:
+                        for rb in remove_bias:
+                            try:
+                                model = ExponentialSmoothing(y_train, trend=t, seasonal=s, seasonal_periods=sp)
+                                model_fit = model.fit(optimized=True, use_boxcox=bc, remove_bias=rb)
+                                y_pred = model_fit.forecast(y_test.shape[0])
+                                model_mape = self.mape_error(y_test, y_pred)
+                                if math.isnan(model_mape):
+                                    pass
+                                elif best_mape is None:
+                                    best_model = model_fit
+                                    best_mape = model_mape
+                                    best_config = [t, s, sp, bc, rb]
+                                elif model_mape < best_mape:
+                                    best_model = model
+                                    best_mape = model_mape
+                                    best_config = [t, s, sp, bc, rb]
+                            except ValueError:
+                                model_error = ["not able to fit model ", 
+                                               str(t),
+                                               str(s),
+                                               str(sp),
+                                               str(bc),
+                                               str(rb)]
+                                msg = " ".join(model_error)
+                                errors.append(msg)
+
+        return best_model, best_mape, errors, best_config
+
