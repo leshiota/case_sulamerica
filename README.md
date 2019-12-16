@@ -19,9 +19,6 @@ Repository with codes, notebooks and data for Sulamérica interview.
 ├── setup.py
 ├── src
 │   ├── __init__.py
-│   ├── __pycache__
-│   │   ├── __init__.cpython-36.pyc
-│   │   └── __init__.cpython-37.pyc
 │   └── utils
 │       ├── __init__.py
 │       └── sulamerica.py
